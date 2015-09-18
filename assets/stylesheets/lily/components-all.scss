@@ -1,0 +1,49 @@
+.addable-items-inputer {
+  .ops {
+    padding: 10px 0;
+  }
+  .list {
+    border-bottom: solid 1px #ddd;
+    padding: 10px 0;
+
+    .item {
+      overflow: hidden;
+      margin-bottom: 10px;
+      &:last-child {margin-bottom: 0;}
+    }
+  }
+}
+
+.lily-switch {
+  height:30px;
+  width:60px;
+  border-radius:100px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1) inset;
+  position: relative;
+  transition: background-color ease 0.2s;
+  cursor: pointer;
+  margin: 10px 0;
+
+  .switch-checkbox {display: none;}
+
+  .switch-toggle {
+    position: absolute;
+    height:26px;
+    width:26px;
+    top:2px;
+    background-color: #FFF;
+    border-radius: 100px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    transition: all ease 0.2s;
+    pointer-events: none;
+  }
+
+  &.state-off {
+    background-color: #ddd;
+    .switch-toggle { left:2px; }
+  }
+  &.state-on {
+    background-color: #49D866;
+    .switch-toggle { left:32px; }
+  }
+}
