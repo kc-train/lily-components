@@ -1,0 +1,20 @@
+.page-demo.page-demo-switch
+  %h2 switch
+  .row
+    .col-sm-4
+      .example
+        .name 默认皮肤
+        .ct
+          = react_component 'Switch', { name: 'foobar' }
+
+    .col-sm-4
+      .example
+        .name on-off 皮肤
+        .ct
+          = react_component 'Switch', { name: 'foobar', state: 'on', skin: 'on-off' }
+
+    .col-sm-4
+      .example
+        .name on-off-cn 皮肤
+        .ct
+          = react_component 'Switch', { name: 'foobar', state: 'on', skin: 'on-off-cn' }

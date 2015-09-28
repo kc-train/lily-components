@@ -1,0 +1,12 @@
+development:
+  sessions:
+    default:
+      database: try-react-prerender_dev
+      hosts:
+        - localhost:27017
+test:
+  sessions:
+    default:
+      database: try-react-prerender_test
+      hosts:
+        - localhost:27017
