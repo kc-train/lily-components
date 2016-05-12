@@ -11,4 +11,6 @@
 // https://github.com/medialize/URI.js
 //= require URIjs
 
-//= require ui
+//= require lily-components-all
+
+//= require_tree ./sample

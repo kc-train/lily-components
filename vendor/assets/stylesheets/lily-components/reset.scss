@@ -1,0 +1,37 @@
+// font family
+// -----------------------------------
+$mindpin-font-family: "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif", "微软雅黑";
+
+body,
+.ui.menu,
+.ui.cards > .card > .content > .header, 
+.ui.card > .content > .header,
+.ui.header,
+.ui.button,
+h1, h2, h3, h4, h5, h6,
+{
+  font-family: $mindpin-font-family !important;
+}
+
+input
+{
+  font-family: $mindpin-font-family !important;
+}
+
+// colors
+// -----------------------------------
+$body-bg-color: #fdfdfd;
+body {background-color: $body-bg-color;}
+
+// segment
+.ui.segment,
+{
+  border-radius: 0;
+  box-shadow: none;
+}
+
+// table
+.ui.table{
+  border-radius: 0;
+}
+
