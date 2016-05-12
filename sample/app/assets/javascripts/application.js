@@ -1,10 +1,14 @@
 //= require jquery
 //= require jquery_ujs
+
 //= require turbolinks
-//= require bootstrap-sprockets
+
 //= require react
 //= require react_ujs
 
-//= require lily/components
+//= require semantic
+
+// https://github.com/medialize/URI.js
+//= require URIjs
 
 //= require ui

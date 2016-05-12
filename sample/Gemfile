@@ -1,41 +1,45 @@
-source 'http://ruby.taobao.org'
+source 'https://ruby.taobao.org'
 
 gem 'rails', '4.2.3'
-gem 'sass-rails', '~> 5.0'
 gem 'uglifier', '>= 1.3.0'
-gem 'coffee-rails', '~> 4.1.0'
-
-gem 'jquery-rails'
-gem 'turbolinks'
 gem 'jbuilder', '~> 2.0'
-gem 'sdoc', '~> 0.4.0', group: :doc
+gem 'haml'
+
+gem 'turbolinks', '~> 5.0.0.beta'
+gem 'sass-rails', '~> 5.0'
+gem 'coffee-rails', '~> 4.1.0'
+gem 'jquery-rails'
+
+gem 'sprockets', '3.4.0'
+gem 'sprockets-rails', '2.3.3'
+
+gem 'react-rails', '1.7.1'
+gem 'sprockets-coffee-react', '4.0.0'
+gem 'non-stupid-digest-assets'
 
 group :development, :test do
   gem 'byebug'
   gem 'web-console', '~> 2.0'
   gem 'spring'
-  gem 'rspec-rails', '~> 3.0'
-end
+  gem 'pry-rails'
 
-# 更友好的出错页面
-group :test, :development do
+  # 更友好的出错页面
   gem 'better_errors'
   gem 'binding_of_caller'
 end
 
 group :test do
   gem 'database_cleaner', '~> 1.4.1'
-  gem "factory_girl_rails"
+  gem 'factory_girl_rails'
   gem 'capybara'
 end
-
-gem 'mongoid', '~> 4.0.2'
-gem 'haml'
 
 # -------------
 
 gem 'lily-components', path: '../'
 
-gem 'bootstrap-sass', '~> 3.3.5'
-gem 'react-rails', '~> 1.2.0'
-gem 'sprockets-coffee-react', '~> 3.0.1'
+# 通过 rails assets 服务加载前端包
+source 'https://rails-assets.org'
+
+gem 'rails-assets-semantic'
+gem 'rails-assets-URIjs'

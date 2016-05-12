@@ -15,8 +15,8 @@ Gem::Specification.new do |s|
   s.required_ruby_version     = ">= 1.9.3"
   s.required_rubygems_version = ">= 1.3.6"
 
-  spec.files         = `git ls-files`.split("\n")
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
-  spec.require_paths = ["lib"]
+  s.files         = `git ls-files`.split("\n")
+  s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  s.test_files    = s.files.grep(%r{^(test|spec|features)/})
+  s.require_paths = ["lib"]
 end
