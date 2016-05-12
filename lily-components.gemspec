@@ -1,22 +1,22 @@
 # coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'lily-components/version'
+require File.expand_path('../lib/lily-components/version', __FILE__)
 
-Gem::Specification.new do |spec|
-  spec.name          = "lily-components"
-  spec.version       = LilyComponents::VERSION
-  spec.authors       = ["ben7th"]
-  spec.email         = ["ben7th@sina.com"]
-  spec.summary       = "mindpin lily components"
-  spec.homepage      = "https://github.com/kc-train/lily-components"
-  spec.license       = "MIT"
+Gem::Specification.new do |s|
+  s.name        = "lily-components"
+  s.version     = LilyComponents::VERSION
+  s.platform       = Gem::Platform::RUBY
+  s.authors     = ["ben7th"]
+  s.email       = ["ben7th@sina.com"]
+  s.homepage    = "https://github.com/kc-train/lily-components"
+  s.summary     = "mindpin lily components"
+  s.description = "This gem provides components for mindpin team's projects."
+  s.license     = "MIT"
 
-  spec.files         = `git ls-files -z`.split("\x0")
+  s.required_ruby_version     = ">= 1.9.3"
+  s.required_rubygems_version = ">= 1.3.6"
+
+  spec.files         = `git ls-files`.split("\n")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
-
-  spec.add_development_dependency "bundler", "~> 1.7"
-  spec.add_development_dependency "rake", "~> 10.0"
 end
