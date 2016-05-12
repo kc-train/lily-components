@@ -36,7 +36,7 @@ end
 
 # -------------
 
-gem 'lily-components', path: '../'
+gem 'lily-components', github: 'kc-train/lily-components'
 
 # 通过 rails assets 服务加载前端包
 source 'https://rails-assets.org'

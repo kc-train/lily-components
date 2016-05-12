@@ -1,5 +1,6 @@
-PATH
-  remote: ../
+GIT
+  remote: git://github.com/kc-train/lily-components.git
+  revision: 9dc2eec3b2d1c0b2ade5ec8f6646098890c17403
   specs:
     lily-components (0.0.2)
 
