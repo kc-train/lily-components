@@ -1,6 +1,9 @@
-- assets
-  - javascripts
-    - utils # 一些基于原生 js 封装的代码
-    - extensions # 扩展第三方库的代码，如给 jQuery 添加行为
-  - stylesheets
-    * reset.scss # 修正浏览器以及 semantic-ui 的一些默认样式
+assets
+  javascripts
+    utils # 一些基于原生 js 封装的代码
+    extensions # 扩展第三方库的代码，如给 jQuery 添加行为
+  stylesheets
+    lily-components
+      semantic
+        - semantic.css # 修改字体信息为国内镜像
+      - reset.scss # 修正浏览器以及 semantic-ui 的一些默认样式

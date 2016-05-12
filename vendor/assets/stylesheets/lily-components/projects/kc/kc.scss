@@ -1,0 +1,48 @@
+.kc-teller-text-input-tester {
+  border:solid 1px #ececec;
+  background-color: #fff;
+  padding: 1rem;
+  position: relative;
+  height: 50rem;
+  overflow: hidden;
+
+  .lines {
+    padding: 0 1rem;
+    position: absolute;
+    top: 5rem;
+    .line {
+      color: #999;
+      font-size: 16px;
+      height: 24px;
+      line-height: 24px;
+    }
+    .current-line {
+      height: 89px + 7px;
+    }
+  }
+
+  .inputer {
+    border:solid 2px #ececec;
+    position: absolute;
+    top: 5rem;left:12px;right:12px;
+    background-color: #FFF;
+    max-width: 800px;
+
+    .current-line-text {
+      font-size: 16px;
+      line-height: 24px;
+      padding: 0.5rem 1rem;
+    }
+    .ui.input {
+      display: block;
+      padding: 0 0.5rem 0.5rem;
+      input {
+        width: 100%;
+        font-size: 16px;
+        padding:0 0.5rem;
+        height: 40px;
+        margin-left: -1px;
+      }
+    }
+  }
+}
