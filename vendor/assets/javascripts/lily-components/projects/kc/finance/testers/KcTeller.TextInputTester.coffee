@@ -68,42 +68,149 @@ TextSpliter = React.createClass
 
 @KcTeller.TextInputTester = React.createClass
   getInitialState: ->
-    splits = TextSpliter.split sample_text, 35
-    lines = splits.map (s)->
-      s.map((x)-> x.str).join('')
+    lines = TextSpliter.split(sample_text, 35).map (s)->
+      jQuery.trim s.map((x)-> x.str).join('')
 
     lines: lines
+    inputed_lines: []
     current_line: 0
 
   render: ->
-    lines_top_offset = - 24 * @state.current_line
+    lines_style =
+      marginTop: - 24 * @state.current_line
 
     <div className='kc-teller-text-input-tester'>
-      <div className='lines' style={marginTop: lines_top_offset}>
+      <div className='lines' style={lines_style}>
       {
-        for str, idx in @state.lines
-          if idx == @state.current_line
-            <div key={idx} className='current-line' />
-          else
-            <div key={idx} className='line'>{str}</div>
+        for text, idx in @state.lines
+          _props =
+            idx: idx
+            current_line: @state.current_line
+            text: text
+
+          <Line key={idx} {..._props} />
       }
       </div>
 
-      <div className='inputer'>
-        <div className='current-line-text'>{@state.lines[@state.current_line]}</div>
-        <div className='ui input'>
-          <input type='text' onKeyDown={@change_line}/>
-        </div>
+      {
+        _props =
+          text: @get_current_line_text()
+          onKeyDown: @inputer_key_down
+          onLineInputed: @inputer_line_inputed
+        <Inputer {..._props} ref='inputer' />
+      }
+    </div>
+
+  get_current_line_text: ->
+    @state.lines[@state.current_line]
+
+  inputer_key_down: (evt)->
+    switch evt.which
+      when 8 # 退格
+        if @refs.inputer.state.showing_value == '' and @state.current_line > 0
+          @prev_line()
+          @refs.inputer.set_value @state.inputed_lines[@state.current_line - 1]
+    #   when 38
+    #     @prev_line()
+    #   when 40
+    #     @next_line()
+
+  next_line: ->
+    if @state.current_line < @state.lines.length - 1
+      @setState current_line: @state.current_line + 1
+
+  prev_line: ->
+    if @state.current_line > 0
+      @setState current_line: @state.current_line - 1
+
+  inputer_line_inputed: (inputed_text, overflow_text)->
+    @next_line()
+    inputed_lines = @state.inputed_lines
+    inputed_lines.push inputed_text
+    @setState inputed_lines: inputed_lines
+    @refs.inputer.set_value overflow_text
+
+
+
+Line = React.createClass
+  propTypes:
+    text:         React.PropTypes.string.isRequired
+    current_line: React.PropTypes.number.isRequired
+    idx:          React.PropTypes.number.isRequired
+
+  render: ->
+    if @is_current()
+      <div className='current-line' />
+    else
+      <div className='line'>
+      {
+        for char, idx in @props.text.split('')
+          <span key={idx}>{char}</span>
+      }
+      </div>
+
+  is_current: ->
+    @props.idx == @props.current_line
+
+
+Inputer = React.createClass
+  propTypes:
+    text:          React.PropTypes.string.isRequired
+    onKeyDown:     React.PropTypes.func.isRequired
+    onLineInputed: React.PropTypes.func.isRequired
+
+  getInitialState: ->
+    inputed_value: ''
+    showing_value: ''
+    cn_ipt_flag: false # 中文输入法是否打开
+
+  render: ->
+    <div className='inputer'>
+      <div className='current-line-text'>
+      {
+        arr0 = @props.text.split('')
+        arr1 = @state.inputed_value.split('')
+
+        for char0, idx in arr0
+          char1 = arr1[idx]
+          klass = new ClassName
+            'incorrect': char1? and char0 != char1
+            'correct': char1? and char0 == char1
+            'char': true
+
+          <span key={idx} className={klass}>{char0}</span>
+      }
+      </div>
+      <div className='ui input'>
+        <input 
+          type='text' 
+          value={@state.showing_value} 
+          onKeyDown={@props.onKeyDown} 
+          onChange={@change}
+          ref='input'
+        />
       </div>
     </div>
 
-  change_line: (evt)->
-    switch evt.which
-      when 37
-        current_line = @state.current_line
-        return if current_line == 0
-        @setState current_line: current_line - 1
-      when 39
-        current_line = @state.current_line
-        return if current_line == @state.lines.length - 1
-        @setState current_line: current_line + 1
+  set_value: (value)->
+    @setState 
+      showing_value: value
+      inputed_value: value
+
+  change: (evt)->
+    value = evt.target.value
+    @setState showing_value: value
+    unless @state.cn_ipt_flag
+      @setState inputed_value: value
+      if value.length >= @props.text.length
+        t1 = value.substring 0, @props.text.length
+        t2 = value.substring @props.text.length
+        @props.onLineInputed t1, t2
+
+  # 参考 http://www.cnblogs.com/chyingp/p/3599641.html
+  # 处理中文输入法问题
+
+  componentDidMount: ->
+    jQuery ReactDOM.findDOMNode @refs.input
+      .on 'compositionstart', => @setState cn_ipt_flag: true
+      .on 'compositionend', => @setState cn_ipt_flag: false
