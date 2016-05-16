@@ -31,7 +31,26 @@
     .current-line-text {
       font-size: 16px;
       line-height: 24px;
-      padding: 0.5rem 1rem;
+      padding: 0.5rem 1rem 1rem;
+      span.char.correct {
+        background-color: #EAFFEA;
+        // background-color: #A6F3A6;
+        color: #55A532;
+      }
+      span.char.incorrect {
+        background-color: #FFECEC;
+        // background-color: #F8CBCB;
+        color: #BD2C00;
+        position: relative;
+        &:after {
+          content: "×";
+          position: absolute;
+          top:100%;left:0;right:0;
+          height:10px;line-height:10px;
+          font-size:10px;
+          text-align: center;
+        }
+      }
     }
     .ui.input {
       display: block;
