@@ -36,7 +36,8 @@ end
 
 # -------------
 
-gem 'lily-components', github: 'kc-train/lily-components'
+gem 'lily-components', github: 'kc-train/lily-components',
+                       ref: 'b8f7672'
 
 # 通过 rails assets 服务加载前端包
 source 'https://rails-assets.org'
