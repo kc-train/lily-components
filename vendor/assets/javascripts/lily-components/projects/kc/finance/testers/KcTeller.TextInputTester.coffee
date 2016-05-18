@@ -68,52 +68,58 @@ TextSpliter = React.createClass
 
 @KcTeller.TextInputTester = React.createClass
   getInitialState: ->
-    lines = TextSpliter.split(sample_text, 35).map (s)->
+    lines = TextSpliter.split(sample_text, 30).map (s)->
       jQuery.trim s.map((x)-> x.str).join('')
 
+    total_chars_count = 0
+    lines.forEach (x)->
+      total_chars_count += x.length
+
     lines: lines
-    inputed_lines: []
+    inputed_lines: EmptyArray(lines.length, null)
     current_line: 0
+
+    total_chars_count: total_chars_count
+    inputed_chars_count: 0
 
   render: ->
     lines_style =
-      marginTop: - 24 * @state.current_line
+      marginTop: - 70 * @state.current_line
 
     <div className='kc-teller-text-input-tester'>
-      <div className='lines' style={lines_style}>
       {
-        for text, idx in @state.lines
+        <div className='panel'>
+          <div>文章总字数：{@state.total_chars_count}</div>
+          <div>目前已输入：{@state.inputed_chars_count}</div>
+        </div>
+      }
+      <div className='scene'>
+        <div className='lines' style={lines_style}>
+        {
+          for text, idx in @state.lines
+            _props =
+              key: idx
+              idx: idx
+              current_line: @state.current_line
+              text: text
+              inputed_text: @state.inputed_lines[idx]
+            <Line {..._props} />
+        }
+        </div>
+
+        {
           _props =
-            idx: idx
-            current_line: @state.current_line
-            text: text
-
-          <Line key={idx} {..._props} />
-      }
+            text: @get_current_line_text()
+            onKeyDown: @inputer_key_down
+            onLineInputed: @inputer_line_inputed
+            recount: @recount
+          <Inputer {..._props} ref='inputer' />
+        }
       </div>
-
-      {
-        _props =
-          text: @get_current_line_text()
-          onKeyDown: @inputer_key_down
-          onLineInputed: @inputer_line_inputed
-        <Inputer {..._props} ref='inputer' />
-      }
     </div>
 
   get_current_line_text: ->
     @state.lines[@state.current_line]
-
-  inputer_key_down: (evt)->
-    switch evt.which
-      when 8 # 退格
-        if @refs.inputer.state.showing_value == '' and @state.current_line > 0
-          @prev_line()
-          @refs.inputer.set_value @state.inputed_lines[@state.current_line - 1]
-    #   when 38
-    #     @prev_line()
-    #   when 40
-    #     @next_line()
 
   next_line: ->
     if @state.current_line < @state.lines.length - 1
@@ -123,31 +129,51 @@ TextSpliter = React.createClass
     if @state.current_line > 0
       @setState current_line: @state.current_line - 1
 
+  inputer_key_down: (evt)->
+    switch evt.which
+      when 8 # 退格
+        if @refs.inputer.is_line_empty() and @state.current_line > 0
+          inputed_lines = @state.inputed_lines
+          @refs.inputer.set_value inputed_lines[@state.current_line - 1]
+          inputed_lines[@state.current_line - 1] = null
+          @setState inputed_lines: inputed_lines
+          @prev_line()
+
   inputer_line_inputed: (inputed_text, overflow_text)->
     @next_line()
     inputed_lines = @state.inputed_lines
-    inputed_lines.push inputed_text
+    inputed_lines[@state.current_line] = inputed_text
     @setState inputed_lines: inputed_lines
     @refs.inputer.set_value overflow_text
 
+  recount: (current_inputer_text)->
+    count = current_inputer_text.length
+    @state.inputed_lines.forEach (x)->
+      count += x.length if x?
+    @setState
+      inputed_chars_count: count
 
 
 Line = React.createClass
   propTypes:
-    text:         React.PropTypes.string.isRequired
-    current_line: React.PropTypes.number.isRequired
     idx:          React.PropTypes.number.isRequired
+    current_line: React.PropTypes.number.isRequired
+    text:         React.PropTypes.string.isRequired
+    inputed_text: React.PropTypes.string
 
   render: ->
-    if @is_current()
+    if @is_inputed()
+      <div className='inputed-line'>
+        <CompareLine origin={@props.text} compare={@props.inputed_text} />
+        <SpansText text={@props.inputed_text} className='inputed' />
+      </div>
+    else if @is_current()
       <div className='current-line' />
     else
-      <div className='line'>
-      {
-        for char, idx in @props.text.split('')
-          <span key={idx}>{char}</span>
-      }
-      </div>
+      <SpansText className='line' text={@props.text} />
+
+  is_inputed: ->
+    @props.idx < @props.current_line
 
   is_current: ->
     @props.idx == @props.current_line
@@ -166,21 +192,7 @@ Inputer = React.createClass
 
   render: ->
     <div className='inputer'>
-      <div className='current-line-text'>
-      {
-        arr0 = @props.text.split('')
-        arr1 = @state.inputed_value.split('')
-
-        for char0, idx in arr0
-          char1 = arr1[idx]
-          klass = new ClassName
-            'incorrect': char1? and char0 != char1
-            'correct': char1? and char0 == char1
-            'char': true
-
-          <span key={idx} className={klass}>{char0}</span>
-      }
-      </div>
+      <CompareLine origin={@props.text} compare={@state.inputed_value} />
       <div className='ui input'>
         <input 
           type='text' 
@@ -190,6 +202,12 @@ Inputer = React.createClass
           ref='input'
         />
       </div>
+      {
+        l0 = @props.text.length
+        l1 = @state.showing_value.length
+        l2 = l0 - l1
+        <div className='ipt-stat'>剩 {l2} 字</div>
+      }
     </div>
 
   set_value: (value)->
@@ -197,14 +215,19 @@ Inputer = React.createClass
       showing_value: value
       inputed_value: value
 
+  is_line_empty: ->
+    @state.showing_value == ''
+
   change: (evt)->
     value = evt.target.value
+    text_length = @props.text.length
     @setState showing_value: value
     unless @state.cn_ipt_flag
       @setState inputed_value: value
-      if value.length >= @props.text.length
-        t1 = value.substring 0, @props.text.length
-        t2 = value.substring @props.text.length
+      @props.recount value
+      if value.length >= text_length
+        t1 = value.substring 0, text_length
+        t2 = value.substring text_length
         @props.onLineInputed t1, t2
 
   # 参考 http://www.cnblogs.com/chyingp/p/3599641.html
@@ -214,3 +237,39 @@ Inputer = React.createClass
     jQuery ReactDOM.findDOMNode @refs.input
       .on 'compositionstart', => @setState cn_ipt_flag: true
       .on 'compositionend', => @setState cn_ipt_flag: false
+
+
+CompareLine = React.createClass
+  propTypes:
+    origin:  React.PropTypes.string.isRequired
+    compare: React.PropTypes.string.isRequired
+
+  render: ->
+    arr0 = @props.origin.split('')
+    arr1 = @props.compare.split('')
+
+    incorrect_count = 0
+    correct_count = 0
+
+    <div className='compare-line'>
+    {
+      for char0, idx in arr0
+        char1 = arr1[idx]
+        is_incorrect = char1? and char0 != char1
+        is_correct = char1? and char0 == char1
+        incorrect_count += 1 if is_incorrect
+        correct_count += 1 if is_correct
+
+        klass = new ClassName
+          'incorrect': is_incorrect
+          'correct': is_correct
+          'char': true
+        <span key={idx} className={klass}>{char0}</span>
+    }
+    {
+      if @props.origin.length == @props.compare.length
+        total = @props.origin.length
+        percent = Math.round(correct_count * 100 / total)
+        <div className='cl-stat'>正确率 {percent}%</div>
+    }
+    </div>
