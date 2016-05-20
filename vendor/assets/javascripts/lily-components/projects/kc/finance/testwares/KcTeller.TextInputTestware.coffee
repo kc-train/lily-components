@@ -10,86 +10,84 @@ sample_text = [
   '笔“网上银行”交易，客户若拥有中国银行发行的长城卡，就可通过中行主页申请网上银行服务，'
   '得到银行的服务许可后，即可随时进行网上支付。此外，招商银行的“一卡通”业务在上海、深'
   '圳、广州、北京等城市也开展了个人银行、企业银行、网上支付等业务。目前我国其他商业银行如'
-  '工商银行、建设银行的网上金融业务都在积极建设之中。'
+  '工商银行、建设银行的网上金融业务都在积极建设之中。That\'s all.'
 ].join('')
 
-TextSpliter = React.createClass
-  render: ->
-    result = TextSpliter.split @props.text
-    <table className='ui celled table'>
-    <tbody>
-    {
-      for item, idx in result
-        [
-          <tr key="#{idx}_1">
-          {
-            for s, idx1 in item
-              <td key={idx1}>{s.str}</td>
-          }
-          </tr>
-          <tr key="#{idx}_2">
-          {
-            for s, idx1 in item
-              <td key={idx1}>{s.length}</td>
-          }
-          </tr>
-        ]
-    }
-    </tbody>
-    </table>
+LineItem = class
+  constructor: ->
+    @short_string_array = []
+    @length = 0
 
-  statics:
-    split: (text, line_length = 30)->
-      arr = text.match /\w+|[\u4E00-\u9FA5]|[\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b]|\s/g
-      arr = arr.map (x)->
-        l = 2 if x.match /[\u4E00-\u9FA5]/
-        l = 2 if x.match /[\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b]/
-        l = 1 if x.match /\s/
-        l = x.length if x.match /\w+/
-        {len: l, str: x}
-      
-      result = []
-      _arr = []
-      _len = 0
-      
-      _line_length = line_length * 2
+  add: (str_len)->
+    @short_string_array.push str_len.str
+    @length += str_len.len
 
-      while arr.length > 0
-        x = arr.shift()
-        _arr.push x
-        _len += x.len
-        if _len >= _line_length || arr.length == 0
-          result.push _arr
-          _arr = []
-          _len = 0
-
-      return result
+  get_string: ->
+    jQuery.trim @short_string_array.join('')
 
 
-@KcTeller.TextInputTester = React.createClass
+TextSpliter = class
+  RT: /\u0020|[\u0000-\u001f\u0021-\u00ff]+|[^\u0000-\u00ff]/g
+
+  RSPACE: /\u0020/
+  RENG: /[\u0000-\u001f\u0021-\u00ff]+/
+  RCHS: /[^\u0000-\u00ff]/
+
+  constructor: (text)->
+    @text = text
+
+  _split_by_chs_char_or_eng_word: ->
+    @text.match @RT
+
+  _get_short_str_len_array: ->
+    @_split_by_chs_char_or_eng_word().map (str)=>
+      len = 1          if str.match @RSPACE
+      len = str.length if str.match @RENG
+      len = 2          if str.match @RCHS
+      {str: str, len: len}
+
+  split: (line_length = 30)->
+    str_len_array = @_get_short_str_len_array()
+    result = []
+    li = new LineItem
+    _line_length = line_length * 2
+
+    while str_len_array.length > 0
+      li.add str_len_array.shift()
+      if li.length >= _line_length || str_len_array.length == 0
+        result.push li
+        li = new LineItem
+
+    return result
+
+  lines: ->
+    @split().map (li)-> li.get_string()
+
+# -----------------
+
+@KcTeller.TextInputTestware = React.createClass
   getInitialState: ->
-    lines = TextSpliter.split(sample_text, 30).map (s)->
-      jQuery.trim s.map((x)-> x.str).join('')
+    lines = new TextSpliter(sample_text).lines()
 
-    total_chars_count = 0
+    chars_count = 0
     lines.forEach (x)->
-      total_chars_count += x.length
+      chars_count += x.length
 
     lines: lines
     inputed_lines: EmptyArray(lines.length, null)
     current_line: 0
 
-    total_chars_count: total_chars_count
+    chars_count: chars_count
     inputed_chars_count: 0
 
   render: ->
     lines_style =
-      marginTop: - 70 * @state.current_line
+      marginTop: - 71 * @state.current_line + 1
 
     <div className='kc-teller-text-input-tester'>
       {
         <div className='panel'>
-          <div>文章总字数：{@state.total_chars_count}</div>
+          <div>文章总字数：{@state.chars_count}</div>
           <div>目前已输入：{@state.inputed_chars_count}</div>
         </div>
       }
@@ -188,7 +186,6 @@ Inputer = React.createClass
   getInitialState: ->
     inputed_value: ''
     showing_value: ''
-    cn_ipt_flag: false # 中文输入法是否打开
 
   render: ->
     <div className='inputer'>
@@ -222,7 +219,7 @@ Inputer = React.createClass
     value = evt.target.value
     text_length = @props.text.length
     @setState showing_value: value
-    unless @state.cn_ipt_flag
+    unless @cn_ipt_flag
       @setState inputed_value: value
       @props.recount value
       if value.length >= text_length
@@ -234,9 +231,13 @@ Inputer = React.createClass
   # 处理中文输入法问题
 
   componentDidMount: ->
+    @cn_ipt_flag = false # 中文输入法是否打开
+    # ben7th: 这里只能使用实例变量，不能用 state，
+    # 否则在 firefox 下会出现中文输入法打不出字的问题
+
     jQuery ReactDOM.findDOMNode @refs.input
-      .on 'compositionstart', => @setState cn_ipt_flag: true
-      .on 'compositionend', => @setState cn_ipt_flag: false
+      .on 'compositionstart', => @cn_ipt_flag = true
+      .on 'compositionend', => @cn_ipt_flag = false
 
 
 CompareLine = React.createClass

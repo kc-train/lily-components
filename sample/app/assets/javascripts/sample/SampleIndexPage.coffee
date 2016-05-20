@@ -1,6 +1,6 @@
 components = [
-  ['文字输入测验', 'KcTeller.TextInputTester']
-  ['交易代码记忆测验', 'KcTeller.TransactionCodeMemoryTester']
+  ['文字输入测验', 'KcTeller.TextInputTestware']
+  ['交易代码记忆测验', 'KcTeller.TransactionCodeMemoryTestware']
 ].map (x)->
   {name: x[0], component_name: x[1]}
 
