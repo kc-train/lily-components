@@ -9,7 +9,7 @@
         <h4 className='ui header'>demo:</h4>
         {
           c = eval(@props.data.component)
-          React.createElement(c, {})
+          React.createElement(c, @props.data.sample_data)
         }
       </div>
     </div>
