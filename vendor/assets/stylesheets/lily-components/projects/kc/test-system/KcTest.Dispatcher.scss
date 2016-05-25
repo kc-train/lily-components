@@ -5,4 +5,26 @@ $bdc: #ececec;
   padding: 1rem;
   border:solid 1px $bdc;
   min-height: 50rem;
+
+  .running-status {
+    margin: -1rem -1rem 1rem;
+    padding: 1rem;
+    border-bottom: solid 1px $bdc;
+    height: 30px;
+    line-height: 30px;
+    box-sizing: content-box;
+    .user {
+      margin-right: 1rem;
+    }
+    .remain-time {
+      color: #FF6A05;
+      margin-left: 0.5rem;
+    }
+    .select-wares {
+      float: right;
+      height: 30px;
+      line-height: 30px;
+      padding: 0 1rem;
+    }
+  }
 }
