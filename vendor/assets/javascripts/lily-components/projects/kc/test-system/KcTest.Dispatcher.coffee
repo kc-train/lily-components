@@ -23,12 +23,17 @@ SAMPLE =
         {
           kind: "single_choice"
           score: 5, # 每题分值
-          test_wares: ['id1', 'id2']
+          test_wares: ['id1-1', 'id1-2']
         }
         {
           kind: "multi_choice"
           score: 5, # 每题分值
-          test_wares: ['id3', 'id4']
+          test_wares: ['id2-1', 'id2-2', 'id2-3']
+        }
+        {
+          kind: "bool"
+          score: 5, # 每题分值
+          test_wares: ['id3-1', 'id3-2', 'id3-3', 'id3-4', 'id3-5', 'id3-6']
         }
       ]
 
@@ -220,13 +225,15 @@ SelectWares = React.createClass
     jQuery.open_modal(
       <Selector wares_index={@props.wares_index} />
       className: 'test-dispatcher-select-wares-modal'
+      modal_config:
+        blurring: true
     )
 
 Selector = React.createClass
   render: ->
     sections = @props.wares_index?.sections
     <div>
-      <h3>选择题目</h3>
+      <h3>选择并跳转到题目位置</h3>
       {
         for section, idx in sections
           <div key={idx} className='section'>

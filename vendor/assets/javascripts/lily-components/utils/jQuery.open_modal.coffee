@@ -21,13 +21,13 @@ jQuery.open_modal = (component, config={})->
     refresh: ->
       $dom.modal('refresh')
 
-  config = jQuery.extend({
+  modal_config = jQuery.extend({
     blurring: false
     closable: true
-  }, config)
+  }, config.modal_config || {})
 
   $dom
-    .modal config
+    .modal modal_config
     .modal('show')
 
   return handle
