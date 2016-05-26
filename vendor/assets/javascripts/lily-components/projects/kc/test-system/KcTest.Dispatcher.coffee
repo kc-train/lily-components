@@ -2,8 +2,8 @@
 # http://markdown.4ye.me/OZqnksBw
 # http://markdown.4ye.me/OZqnksBw/2
 
-sample_seconds = 3 * 3600 + 14 * 60 + 58
-sample_seconds = 10
+sample_seconds = 1 * 3600 + 14 * 60 + 58
+# sample_seconds = 10
 
 SAMPLE = 
   init_res:
@@ -31,6 +31,18 @@ SAMPLE =
           test_wares: ['id3', 'id4']
         }
       ]
+
+  wares_res: [
+    {
+      question: {id: 'q1'}
+    }
+    {
+      question: {id: 'q2'}
+    }
+    {
+      question: {id: 'q3'}
+    }
+  ]
 
 
 @KcTest.Dispatcher = React.createClass
@@ -61,7 +73,7 @@ SAMPLE =
         when 'NOT_START'
           <NotStart start={@start} status_data={@state.status_data} />
         when 'RUNNING'
-          <RunningTest status_data={@state.status_data} timeup={@timeup} />
+          <RunningTest status_data={@state.status_data} timeup={@timeup} parent={@} />
         when 'FINISHED'
           <Finished />
     }
@@ -130,24 +142,37 @@ Finished = React.createClass
     </div>
 
 RunningTest = React.createClass
+  getInitialState: ->
+    wares: []
+
   render: ->
     user_name = @props.status_data?.current_user?.name
     remain_seconds = @props.status_data?.remain_seconds
+    wares_index = @props.status_data?.test_wares_index
 
     <div>
       <div className='running-status'>
         <span className='user'>测验人：{user_name}</span>
-        <span>测验正在进行，剩余时间</span>
+        <span>测验正在进行，剩余计时</span>
         <span className='remain-time'>
           <RemainTimeString remain_seconds={remain_seconds} timeup={@props.timeup} />
         </span>
-        <a className='ui button mini green select-wares'>
-          <i className='icon block layout' /> 选择题目
-        </a>
+        <SelectWares wares_index={wares_index} />
       </div>
-      <div className='test-wares'>
-      </div>
+
+      <TestWares wares={@state.wares} />
+
+      <TestPaginate />
     </div>
+
+  componentDidMount: ->
+    jQuery.ajax
+      url: @props.parent.props.test_wares_url
+      type: 'GET'
+    .done (_res)=>
+      res = if @props.parent.props.sample then SAMPLE.wares_res else _res
+      @setState wares: res
+
 
 RemainTimeString = React.createClass
   getInitialState: ->
@@ -174,3 +199,57 @@ RemainTimeString = React.createClass
 
   componentWillUnmount: ->
     clearInterval @timer
+
+TestWares = React.createClass
+  render: ->
+    <div className='test-wares'>
+    {
+      for ware in @props.wares
+        key = ware?.question?.id
+        <div key={key} className='test-ware' />
+    }
+    </div>
+
+SelectWares = React.createClass
+  render: ->
+    <a className='ui button mini green select-wares' onClick={@select}>
+      <i className='icon block layout' /> 选择题目
+    </a>
+
+  select: ->
+    jQuery.open_modal(
+      <Selector wares_index={@props.wares_index} />
+      className: 'test-dispatcher-select-wares-modal'
+    )
+
+Selector = React.createClass
+  render: ->
+    sections = @props.wares_index?.sections
+    <div>
+      <h3>选择题目</h3>
+      {
+        for section, idx in sections
+          <div key={idx} className='section'>
+            <h4>第 {idx + 1} 部分 - {section.kind}</h4>
+          {
+            for ware, idx1 in section?.test_wares
+              <a key={idx1} className='ware' href='javascript:;' onClick={@select(ware)} />
+          }
+          </div>
+      }
+    </div>
+
+  select: (ware_id)->
+    =>
+      console.log ware_id
+
+TestPaginate = React.createClass
+  render: ->
+    <div className='test-paginate'>
+      <a className='ui labeled icon button green'>
+        <i className='icon arrow left' /> 上一页
+      </a>
+      <a className='ui right labeled icon button green'>
+        <i className='icon arrow right' /> 下一页
+      </a>
+    </div>

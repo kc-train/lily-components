@@ -27,4 +27,41 @@ $bdc: #ececec;
       padding: 0 1rem;
     }
   }
+
+  .test-wares {
+    min-height: 40rem;
+    .test-ware {
+      min-height: 8rem;
+      border-bottom: dashed 1px $bdc
+    }
+  }
+
+  .test-paginate {
+    margin-top: 1rem;
+    text-align: right;
+  }
+}
+
+.test-dispatcher-select-wares-modal {
+  .section {
+    border-bottom: dashed 1px $bdc;
+    padding: 1rem 0;
+    overflow: hidden;
+    &:last-child {
+      border-bottom: 0 none;
+    }
+
+    .ware {
+      float: left;
+      background-color: lighten(#54C8FF, 30%);
+      border: solid 3px rgba(black, 0.3);
+      border-radius: 3px;
+      width: 2rem;
+      height: 2rem;
+      margin-right: 1rem;
+      &:hover {
+        background-color: lighten(#54C8FF, 20%);
+      }
+    }
+  }
 }
