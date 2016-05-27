@@ -31,14 +31,35 @@ $bdc: #ececec;
   .test-wares {
     min-height: 40rem;
     .test-ware {
-      min-height: 8rem;
-      border-bottom: dashed 1px $bdc
+      border-bottom: dashed 1px $bdc;
+      padding: 1rem;
+
+      .single-choice.ui.form,
+      .multi-choice.ui.form,
+      .bool.ui.form,
+      {
+        label.content {
+          margin-bottom: 1rem;
+          display: block;
+        }
+      }
     }
   }
 
   .test-paginate {
     margin-top: 1rem;
     text-align: right;
+    padding-left: 1rem;
+    padding-right: 1rem;
+
+    a.button.right {
+      margin-right: 0;
+    }
+
+    .text {
+      font-size: 16px;
+      margin-right: 2rem;
+    }
   }
 }
 

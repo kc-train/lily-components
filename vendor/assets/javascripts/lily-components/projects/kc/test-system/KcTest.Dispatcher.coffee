@@ -18,24 +18,23 @@ SAMPLE =
       name: '宋亮'
     deadline_time: new Date(new Date().getTime() + sample_seconds * 1000)
     remain_seconds: sample_seconds
-    test_wares_index:
-      sections: [
-        {
-          kind: "single_choice"
-          score: 5, # 每题分值
-          test_wares: ['id1-1', 'id1-2']
-        }
-        {
-          kind: "multi_choice"
-          score: 5, # 每题分值
-          test_wares: ['id2-1', 'id2-2', 'id2-3']
-        }
-        {
-          kind: "bool"
-          score: 5, # 每题分值
-          test_wares: ['id3-1', 'id3-2', 'id3-3', 'id3-4', 'id3-5', 'id3-6']
-        }
-      ]
+    test_wares_index: [
+      {
+        kind: "single_choice"
+        score: 5, # 每题分值
+        test_wares: ['id1-1', 'id1-2']
+      }
+      {
+        kind: "multi_choice"
+        score: 5, # 每题分值
+        test_wares: ['id2-1', 'id2-2', 'id2-3']
+      }
+      {
+        kind: "bool"
+        score: 5, # 每题分值
+        test_wares: ['id3-1', 'id3-2', 'id3-3', 'id3-4', 'id3-5', 'id3-6']
+      }
+    ]
 
   wares_res: [
     {
@@ -148,12 +147,31 @@ Finished = React.createClass
 
 RunningTest = React.createClass
   getInitialState: ->
+    wares_index = @props.status_data?.test_wares_index
+
+    ids = []
+    for section in wares_index
+      for id in section.test_wares
+        ids.push id
+
+    pages = []
+    tmp = []
+    while ids.length > 0
+      tmp.push ids.shift()
+      if tmp.length is 4 or ids.length is 0
+        pages.push tmp
+        tmp = []
+
     wares: []
+    pages: pages
+    current_page: parseInt(localStorage['java-test-page'] || 1)
 
   render: ->
     user_name = @props.status_data?.current_user?.name
     remain_seconds = @props.status_data?.remain_seconds
     wares_index = @props.status_data?.test_wares_index
+
+    # console.log @state.pages
 
     <div>
       <div className='running-status'>
@@ -162,21 +180,51 @@ RunningTest = React.createClass
         <span className='remain-time'>
           <RemainTimeString remain_seconds={remain_seconds} timeup={@props.timeup} />
         </span>
-        <SelectWares wares_index={wares_index} />
+        <SelectWares wares_index={wares_index} to_page_for={@to_page_for} />
       </div>
 
-      <TestWares wares={@state.wares} />
+      <TestWares wares={@state.wares} on_answer_change={@handle_answer_change} />
 
-      <TestPaginate />
+      <TestPaginate pages={@state.pages} current_page={@state.current_page} to_page={@to_page} />
     </div>
 
   componentDidMount: ->
+    @to_page @state.current_page
+
+  handle_answer_change: (ware_id, answer)->
+    console.log id: ware_id, answer: answer
+
+    jQuery.ajax
+      url: @props.parent.props.test_save_url
+      type: "POST"
+      data:
+        id: ware_id
+        answer: answer
+      dataType: "json"
+      success: (res) =>
+        console.log res
+
+
+  to_page: (page)->
+    ids = @state.pages[page - 1]
     jQuery.ajax
       url: @props.parent.props.test_wares_url
       type: 'GET'
+      data:
+        ids: ids
     .done (_res)=>
       res = if @props.parent.props.sample then SAMPLE.wares_res else _res
-      @setState wares: res
+      @setState 
+        wares: res
+        current_page: page
+      localStorage['java-test-page'] = page
+
+  to_page_for: (ware_id)->
+    page = 1
+    for ids, idx in @state.pages
+      page = idx + 1 if ids.indexOf(ware_id) > -1
+    @to_page(page)
+
 
 
 RemainTimeString = React.createClass
@@ -210,8 +258,26 @@ TestWares = React.createClass
     <div className='test-wares'>
     {
       for ware in @props.wares
-        key = ware?.question?.id
-        <div key={key} className='test-ware' />
+        key = ware?.id
+        params =
+          data: ware
+          on_answer_change: @props.on_answer_change
+
+        <div key={key} className='test-ware'>
+        {
+          switch ware.kind
+            when "single_choice"
+              <SingleChoiceTestWare {...params} />
+            when "multi_choice"
+              <MultiChoiceTestWare {...params} />
+            when "bool"
+              <BoolTestWare {...params} />
+            when "essay"
+              <EssayTestWare {...params} />
+            when "file_upload"
+              <FileUploadTestWare {...params} />
+        }
+        </div>
     }
     </div>
 
@@ -222,20 +288,22 @@ SelectWares = React.createClass
     </a>
 
   select: ->
-    jQuery.open_modal(
-      <Selector wares_index={@props.wares_index} />
+    @modal_handle = jQuery.open_modal(
+      <Selector wares_index={@props.wares_index} to_page_for={@props.to_page_for} parent={@} />
       className: 'test-dispatcher-select-wares-modal'
       modal_config:
         blurring: true
     )
 
+  close_modal: ->
+    @modal_handle.close()
+
 Selector = React.createClass
   render: ->
-    sections = @props.wares_index?.sections
     <div>
       <h3>选择并跳转到题目位置</h3>
       {
-        for section, idx in sections
+        for section, idx in @props.wares_index
           <div key={idx} className='section'>
             <h4>第 {idx + 1} 部分 - {section.kind}</h4>
           {
@@ -248,15 +316,30 @@ Selector = React.createClass
 
   select: (ware_id)->
     =>
-      console.log ware_id
+      @props.to_page_for(ware_id)
+      @props.parent.close_modal()
 
 TestPaginate = React.createClass
   render: ->
+    klass1 = new ClassName
+      'ui labeled icon button green': true
+      'disabled': @props.current_page is 1
+
+    klass2 = new ClassName
+      'ui right labeled icon button green': true
+      'disabled': @props.current_page is @props.pages.length
+
     <div className='test-paginate'>
-      <a className='ui labeled icon button green'>
+      <span className='text'>第 {@props.current_page} 页，共 {@props.pages.length} 页</span>
+      <a className={klass1} onClick={@to_page(@props.current_page - 1)}>
         <i className='icon arrow left' /> 上一页
       </a>
-      <a className='ui right labeled icon button green'>
+      <a className={klass2} onClick={@to_page(@props.current_page + 1)}>
         <i className='icon arrow right' /> 下一页
       </a>
     </div>
+
+  to_page: (page)->
+    =>
+      console.log page
+      @props.to_page(page)
