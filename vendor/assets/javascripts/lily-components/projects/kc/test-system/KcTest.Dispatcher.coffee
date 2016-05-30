@@ -85,8 +85,10 @@ SAMPLE =
 
   init: ->
     # 读取当前考试状态，判断是未开考还是已开考
-    jQuery.ajax
+    a = jQuery.ajax
       url: @props.test_status_url
+      data:
+        rnd: Math.random()
       type: 'GET'
     .done (_res)=>
       res = if @props.sample then SAMPLE.init_res else _res
@@ -149,16 +151,17 @@ RunningTest = React.createClass
   getInitialState: ->
     wares_index = @props.status_data?.test_wares_index
 
-    ids = []
+    ware_indexes = []
     for section in wares_index
-      for id in section.test_wares
-        ids.push id
+      for wi, idx in section.test_wares
+        wi.num = idx + 1
+        ware_indexes.push wi
 
     pages = []
     tmp = []
-    while ids.length > 0
-      tmp.push ids.shift()
-      if tmp.length is 4 or ids.length is 0
+    while ware_indexes.length > 0
+      tmp.push ware_indexes.shift()
+      if tmp.length is 4 or ware_indexes.length is 0
         pages.push tmp
         tmp = []
 
@@ -203,10 +206,23 @@ RunningTest = React.createClass
       dataType: "json"
       success: (res) =>
         console.log res
+        @mark_ware_filled(ware_id, res.filled)
 
+  mark_ware_filled: (id, filled)->
+    pages = @state.pages
+
+    for ware_indexes in pages
+      for wi in ware_indexes
+        if wi.id == id
+          wi.filled = filled
+
+    @setState pages: pages
 
   to_page: (page)->
-    ids = @state.pages[page - 1]
+    wares = @state.pages[page - 1]
+    ids = wares.map (wi)-> wi.id
+    numbers = wares.map (wi)-> wi.num
+
     jQuery.ajax
       url: @props.parent.props.test_wares_url
       type: 'GET'
@@ -214,15 +230,19 @@ RunningTest = React.createClass
         ids: ids
     .done (_res)=>
       res = if @props.parent.props.sample then SAMPLE.wares_res else _res
+      for w, idx in res
+        w.number = numbers[idx]
       @setState 
         wares: res
         current_page: page
       localStorage['java-test-page'] = page
 
-  to_page_for: (ware_id)->
+  to_page_for: (ware)->
+    id = ware.id
     page = 1
-    for ids, idx in @state.pages
-      page = idx + 1 if ids.indexOf(ware_id) > -1
+    for ware_indexes, idx in @state.pages
+      ids = ware_indexes.map (wi)-> wi.id
+      page = idx + 1 if ids.indexOf(id) > -1
     @to_page(page)
 
 
@@ -264,19 +284,22 @@ TestWares = React.createClass
           on_answer_change: @props.on_answer_change
 
         <div key={key} className='test-ware'>
-        {
-          switch ware.kind
-            when "single_choice"
-              <SingleChoiceTestWare {...params} />
-            when "multi_choice"
-              <MultiChoiceTestWare {...params} />
-            when "bool"
-              <BoolTestWare {...params} />
-            when "essay"
-              <EssayTestWare {...params} />
-            when "file_upload"
-              <FileUploadTestWare {...params} />
-        }
+          <div className='number'>{ware.number}.</div>
+          <div className='ware-component'>
+          {
+            switch ware.kind
+              when "single_choice"
+                <SingleChoiceTestWare {...params} />
+              when "multi_choice"
+                <MultiChoiceTestWare {...params} />
+              when "bool"
+                <BoolTestWare {...params} />
+              when "essay"
+                <EssayTestWare {...params} />
+              when "file_upload"
+                <FileUploadTestWare {...params} />
+          }
+          </div>
         </div>
     }
     </div>
@@ -302,13 +325,24 @@ Selector = React.createClass
   render: ->
     <div>
       <h3>选择并跳转到题目位置</h3>
+      <div className='tuli'>
+        <span>图例：</span>
+        <span className='not-filled' /><span>未作答</span>
+        <span className='filled' /><span>已作答</span>
+      </div>
+      <a className='ui button mini close' href='javascript:;' onClick={@close}>
+        <i className='icon close' /> 关闭
+      </a>
       {
         for section, idx in @props.wares_index
           <div key={idx} className='section'>
             <h4>第 {idx + 1} 部分 - {section.kind}</h4>
           {
             for ware, idx1 in section?.test_wares
-              <a key={idx1} className='ware' href='javascript:;' onClick={@select(ware)} />
+              klass = new ClassName
+                'ware': true
+                'filled': ware.filled
+              <a key={idx1} className={klass} href='javascript:;' title={ware.id} onClick={@select(ware)} >{idx1 + 1}</a>
           }
           </div>
       }
@@ -318,6 +352,9 @@ Selector = React.createClass
     =>
       @props.to_page_for(ware_id)
       @props.parent.close_modal()
+
+  close: ->
+    @props.parent.close_modal()
 
 TestPaginate = React.createClass
   render: ->
@@ -341,5 +378,5 @@ TestPaginate = React.createClass
 
   to_page: (page)->
     =>
-      console.log page
+      # console.log page
       @props.to_page(page)
