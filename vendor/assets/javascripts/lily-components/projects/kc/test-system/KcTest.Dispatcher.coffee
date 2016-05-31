@@ -152,8 +152,9 @@ RunningTest = React.createClass
     wares_index = @props.status_data?.test_wares_index
 
     ware_indexes = []
-    for section in wares_index
+    for section, section_idx in wares_index
       for wi, idx in section.test_wares
+        wi.section = section_idx + 1
         wi.num = idx + 1
         ware_indexes.push wi
 
@@ -222,6 +223,7 @@ RunningTest = React.createClass
     wares = @state.pages[page - 1]
     ids = wares.map (wi)-> wi.id
     numbers = wares.map (wi)-> wi.num
+    section_numbers = wares.map (wi)-> wi.section
 
     jQuery.ajax
       url: @props.parent.props.test_wares_url
@@ -232,6 +234,7 @@ RunningTest = React.createClass
       res = if @props.parent.props.sample then SAMPLE.wares_res else _res
       for w, idx in res
         w.number = numbers[idx]
+        w.section = section_numbers[idx]
       @setState 
         wares: res
         current_page: page
@@ -284,6 +287,23 @@ TestWares = React.createClass
           on_answer_change: @props.on_answer_change
 
         <div key={key} className='test-ware'>
+          {
+            if ware.number == 1
+              onum = '一二三四五六七八九十'.split('')
+              kind_str = {
+                single_choice:  '单选题'
+                multi_choice:   '多选题'
+                bool:           '判断题'
+                essay:          '论述题'
+                file_upload:    '编码题'
+              }[ware.kind]
+
+              <div className='section-label'>
+                <span className='snum'>第{onum[ware.section - 1]}部分</span>
+                <span className='kind'>{kind_str}</span>
+              </div>
+          }
+
           <div className='number'>{ware.number}.</div>
           <div className='ware-component'>
           {
@@ -335,8 +355,18 @@ Selector = React.createClass
       </a>
       {
         for section, idx in @props.wares_index
+          kind_str = {
+            single_choice:  '单选题'
+            multi_choice:   '多选题'
+            bool:           '判断题'
+            essay:          '论述题'
+            file_upload:    '编码题'
+          }[section.kind]
+
+          onum = '一二三四五六七八九十'.split('')
+
           <div key={idx} className='section'>
-            <h4>第 {idx + 1} 部分 - {section.kind}</h4>
+            <h4>第{onum[idx]}部分 - {kind_str}</h4>
           {
             for ware, idx1 in section?.test_wares
               klass = new ClassName

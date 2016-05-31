@@ -33,6 +33,15 @@ $bdc: #ececec;
     .test-ware {
       border-bottom: dashed 1px $bdc;
       padding: 1rem;
+      // font-size: 16px;
+
+      // .checkbox label {
+      //   font-size: 16px;
+      //   line-height: 24px;
+      //   &:before, &:after {
+      //     margin-top: 4px;
+      //   }
+      // }
 
       .number {
         float: left;
@@ -52,7 +61,28 @@ $bdc: #ececec;
           margin-bottom: 1rem;
           display: block;
           font-weight: bold;
+          // font-size: 16px;
         }
+      }
+    }
+
+    .test-ware .section-label {
+      margin-bottom: 2rem;
+      overflow: hidden;
+      margin-left: -2rem;
+      span {float: left; height: 32px; line-height: 32px;
+        // font-weight: bold;
+        font-size: 16px;
+        color: darken(#D4F1FF, 70%)
+      }
+      span.snum {
+        background-color: #D4F1FF;
+        padding:0 1rem;
+      }
+      span.kind {
+        background-color: darken(#D4F1FF, 5%);
+        padding:0 1rem;
+        border-radius:0 5px 5px 0;
       }
     }
   }
