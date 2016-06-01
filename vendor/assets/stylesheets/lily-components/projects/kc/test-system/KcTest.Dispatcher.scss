@@ -85,6 +85,32 @@ $bdc: #ececec;
         border-radius:0 5px 5px 0;
       }
     }
+
+    .test-ware .file-upload-ware {
+      .percent {
+        margin-bottom: 1rem;
+        max-width: 400px;
+        border: solid 1px #00B5AD;
+        height: 1.5rem;
+        line-height: 1.5rem;
+        text-align: center;
+        position: relative;
+        box-sizing: content-box;
+        background-color: #00B5AD;
+        .bar {
+          position: absolute;
+          top:0;bottom:0;right:0;
+          z-index: 1;
+          background-color: white;
+        }
+        .p {
+          position: absolute;
+          top:0;left:100%;
+          margin-left: 1rem;
+          z-index: 2;
+        }
+      }
+    }
   }
 
   .test-paginate {
