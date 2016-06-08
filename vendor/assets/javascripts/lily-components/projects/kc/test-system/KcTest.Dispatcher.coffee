@@ -130,6 +130,9 @@ InitLoader = React.createClass
     @props.init()
 
 NotStart = React.createClass
+  getInitialState: ->
+    starting: false
+
   render: ->
     <div>
       <div className='ui message warning'>
@@ -139,10 +142,26 @@ NotStart = React.createClass
         <p>请直接在题目上点击或输入作答。所有作答将自动被保存。</p>
         <p>测验过程中请保证网络畅通。</p>
       </div>
-      <a className='ui button green large' onClick={@props.start}>
-        <i className='icon play' /> 开始测验
-      </a>
+      {
+        if @state.starting
+          <div>
+            <a className='ui button green large loading' onClick={@start}>
+              <i className='icon play' /> 开始测验
+            </a>
+            <span style={marginLeft: '1rem'}>正在生成试卷…</span>
+          </div>
+        else
+          <div>
+          <a className='ui button green large' onClick={@start}>
+            <i className='icon play' /> 开始测验
+          </a>
+          </div>
+      }
     </div>
+
+  start: ->
+    @setState starting: true
+    @props.start()
 
 Finished = React.createClass
   render: ->
