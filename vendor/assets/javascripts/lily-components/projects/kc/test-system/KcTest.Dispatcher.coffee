@@ -360,7 +360,7 @@ Selector = React.createClass
             multi_choice:   '多选题'
             bool:           '判断题'
             essay:          '论述题'
-            file_upload:    '编码题'
+            file_upload:    '画图题'
           }[section.kind]
 
           onum = '一二三四五六七八九十'.split('')
