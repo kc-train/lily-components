@@ -79,7 +79,7 @@ SAMPLE =
         when 'RUNNING'
           <RunningTest status_data={@state.status_data} timeup={@timeup} parent={@} />
         when 'FINISHED'
-          <Finished />
+          <Finished status_data={@state.status_data} />
     }
     </div>
 
@@ -102,6 +102,7 @@ SAMPLE =
         action: 'start'
     .done (_res)=>
       res = if @props.sample then SAMPLE.start_res else _res
+      localStorage['java-test-page'] = 1
       @show_status res
 
   show_status: (res)->
@@ -147,7 +148,8 @@ Finished = React.createClass
   render: ->
     <div>
       <div className='ui message warning'>
-        测验已经结束，请关闭此网页
+        <p><strong>{@props.status_data.current_user.name}，你好：</strong></p>
+        <p>你的测验已经结束，请关闭此网页</p>
       </div>
     </div>
 
@@ -173,6 +175,7 @@ RunningTest = React.createClass
     wares: []
     pages: pages
     current_page: parseInt(localStorage['java-test-page'] || 1)
+    saving: false
 
   render: ->
     user_name = @props.status_data?.current_user?.name
@@ -194,6 +197,13 @@ RunningTest = React.createClass
       <TestWares wares={@state.wares} on_answer_change={@handle_answer_change} />
 
       <TestPaginate pages={@state.pages} current_page={@state.current_page} to_page={@to_page} />
+
+      {
+        if @state.saving
+          <div className='saving-label'>
+            <i className='notched circle loading icon' /> 正在保存…
+          </div>
+      }
     </div>
 
   componentDidMount: ->
@@ -202,6 +212,7 @@ RunningTest = React.createClass
   handle_answer_change: (ware_id, answer)->
     console.log id: ware_id, answer: answer
 
+    @setState saving: true
     jQuery.ajax
       url: @props.parent.props.test_save_url
       type: "POST"
@@ -211,6 +222,7 @@ RunningTest = React.createClass
       dataType: "json"
       success: (res) =>
         console.log res
+        @setState saving: false
         @mark_ware_filled(ware_id, res.filled)
 
   mark_ware_filled: (id, filled)->
