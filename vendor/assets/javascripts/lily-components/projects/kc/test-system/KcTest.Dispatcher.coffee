@@ -132,7 +132,11 @@ NotStart = React.createClass
   render: ->
     <div>
       <div className='ui message warning'>
-        测验尚未开始，请点击下方按钮开始测验
+        <p><strong>{@props.status_data.current_user.name}，你好：</strong></p>
+        <p>测验尚未开始，请点击下方的按钮，开始你的测验。</p>
+        <p>测验时间限制为两小时，刷新或关闭浏览器均不会影响计时或结果保存。</p>
+        <p>请直接在题目上点击或输入作答。所有作答将自动被保存。</p>
+        <p>测验过程中请保证网络畅通。</p>
       </div>
       <a className='ui button green large' onClick={@props.start}>
         <i className='icon play' /> 开始测验
