@@ -295,7 +295,7 @@ TestWares = React.createClass
                 multi_choice:   '多选题'
                 bool:           '判断题'
                 essay:          '论述题'
-                file_upload:    '编码题'
+                file_upload:    '画图题'
               }[ware.kind]
 
               <div className='section-label'>
