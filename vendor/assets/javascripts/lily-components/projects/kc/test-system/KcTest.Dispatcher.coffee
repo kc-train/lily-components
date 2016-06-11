@@ -304,7 +304,7 @@ RemainTimeString = React.createClass
       now = new Date().getTime()
       delta = ~~((@state.local_deadline_time - now) / 1000)
       @setState remain_seconds: delta
-      if delta == 0
+      if delta <= 0
         @props.timeup()
     , 50
 
